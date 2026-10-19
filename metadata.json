@@ -1,0 +1,7 @@
+{
+  "name": "Better Version of Me",
+  "description": "Personal self-development web app with daily habits, 14 life skills, reflection journal, and confidence tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
