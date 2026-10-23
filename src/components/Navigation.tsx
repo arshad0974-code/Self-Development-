@@ -5,8 +5,11 @@ import {
   BookMarked, 
   TrendingUp, 
   Settings,
-  CalendarDays
+  CalendarDays,
+  LogOut,
+  User as UserIcon
 } from 'lucide-react';
+import { User } from 'firebase/auth';
 import { formatDateDisplay, getLocalDateString } from '../utils/dateUtils';
 
 export type NavTab = 'dashboard' | 'skills' | 'journal' | 'progress' | 'settings';
@@ -16,6 +19,8 @@ interface NavigationProps {
   onTabChange: (tab: NavTab) => void;
   selectedDate: string;
   onSelectToday: () => void;
+  user?: User | null;
+  onLogout?: () => void;
 }
 
 export const Navigation: React.FC<NavigationProps> = ({
@@ -23,6 +28,8 @@ export const Navigation: React.FC<NavigationProps> = ({
   onTabChange,
   selectedDate,
   onSelectToday,
+  user,
+  onLogout,
 }) => {
   const isToday = selectedDate === getLocalDateString();
 
@@ -95,6 +102,19 @@ export const Navigation: React.FC<NavigationProps> = ({
                 {formatDateDisplay(selectedDate).split(',')[1]}
               </span>
             </div>
+
+            {/* User Account / Logout Control */}
+            {onLogout && (
+              <button
+                onClick={onLogout}
+                className="ml-1 p-2 sm:px-2.5 sm:py-1.5 text-xs font-medium text-slate-400 hover:text-red-300 bg-[#070d1e] hover:bg-red-500/10 border border-white/10 hover:border-red-500/30 rounded-xl transition-all flex items-center gap-1.5 min-h-[40px] min-w-[40px] justify-center"
+                title={user?.email ? `Sign out (${user.email})` : 'Sign out'}
+                aria-label="Sign out"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">Sign Out</span>
+              </button>
+            )}
           </div>
         </div>
       </header>

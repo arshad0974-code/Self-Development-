@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { Loader2 } from 'lucide-react';
 import { 
   Habit, 
   HabitCompletions, 
@@ -28,15 +29,17 @@ import {
   saveSettings 
 } from './utils/storage';
 import { getLocalDateString } from './utils/dateUtils';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AuthScreen } from './components/AuthScreen';
 import { Navigation, NavTab } from './components/Navigation';
 import { DashboardView } from './components/DashboardView';
 import { SkillsView } from './components/SkillsView';
 import { JournalView } from './components/JournalView';
-import { ConfidenceView } from './components/ConfidenceView';
 import { ProgressView } from './components/ProgressView';
 import { SettingsView } from './components/SettingsView';
 
-export default function App() {
+function MainApp() {
+  const { user, loading, logOut } = useAuth();
   const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
   const [selectedDate, setSelectedDate] = useState<string>(() => getLocalDateString());
 
@@ -144,10 +147,8 @@ export default function App() {
 
   const handleRestoreDefaultHabits = () => {
     setHabits(prev => {
-      // Find missing default habits
       const existingIds = new Set(prev.map(h => h.id));
       const unarchivedPrev = prev.map(h => {
-        // Unarchive default habit if it was previously archived
         if (DEFAULT_HABITS.some(dh => dh.id === h.id)) {
           return { ...h, archived: false };
         }
@@ -219,6 +220,27 @@ export default function App() {
     });
   };
 
+  // 1. Initial Authentication Check Loading State
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#070d1e] text-slate-100 flex flex-col items-center justify-center p-4">
+        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400/25 to-teal-500/25 border border-amber-400/40 flex items-center justify-center text-amber-300 font-extrabold text-2xl shadow-xl mb-4 animate-pulse">
+          BV
+        </div>
+        <div className="flex items-center gap-2.5 text-xs text-amber-400 font-semibold tracking-wide">
+          <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
+          <span>Authenticating Session...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // 2. Unauthenticated State: Show Authentication Screen
+  if (!user) {
+    return <AuthScreen />;
+  }
+
+  // 3. Authenticated State: Render Protected Application
   return (
     <div className="min-h-screen bg-[#070d1e] text-slate-100 flex flex-col antialiased selection:bg-amber-500/30 selection:text-amber-200">
       {/* Top Header & Navigation */}
@@ -227,6 +249,8 @@ export default function App() {
         onTabChange={setActiveTab}
         selectedDate={selectedDate}
         onSelectToday={() => setSelectedDate(getLocalDateString())}
+        user={user}
+        onLogout={logOut}
       />
 
       {/* Main Content View Container */}
@@ -285,9 +309,19 @@ export default function App() {
             onUpdateSettings={handleUpdateSettings}
             onDataReset={reloadAllFromStorage}
             onRestoreDefaultHabits={handleRestoreDefaultHabits}
+            user={user}
+            onLogout={logOut}
           />
         )}
       </main>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
   );
 }

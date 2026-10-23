@@ -11,8 +11,11 @@ import {
   RotateCcw, 
   User, 
   Check, 
-  AlertTriangle 
+  AlertTriangle,
+  LogOut,
+  ShieldCheck
 } from 'lucide-react';
+import { User as FirebaseUser } from 'firebase/auth';
 import { UserSettings } from '../types';
 import { exportAllData, importDataFromJson, clearAllData } from '../utils/storage';
 
@@ -21,6 +24,8 @@ interface SettingsViewProps {
   onUpdateSettings: (newSettings: Partial<UserSettings>) => void;
   onDataReset: () => void;
   onRestoreDefaultHabits: () => void;
+  user?: FirebaseUser | null;
+  onLogout?: () => void;
 }
 
 export const SettingsView: React.FC<SettingsViewProps> = ({
@@ -28,6 +33,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   onUpdateSettings,
   onDataReset,
   onRestoreDefaultHabits,
+  user,
+  onLogout,
 }) => {
   const [userNameInput, setUserNameInput] = useState(settings.userName || '');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -164,6 +171,43 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </button>
         </div>
       </section>
+
+      {/* Account & Authentication */}
+      {user && (
+        <section className="bg-[#0a1226] rounded-2xl p-5 sm:p-6 border border-white/10 shadow-lg space-y-4">
+          <div className="flex items-center justify-between border-b border-white/10 pb-3">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-amber-400" />
+              <h3 className="text-sm sm:text-base font-bold text-white">
+                Account & Authentication
+              </h3>
+            </div>
+            <span className="text-[11px] font-medium text-teal-400 bg-teal-500/10 border border-teal-500/20 px-2 py-0.5 rounded-full">
+              Authenticated
+            </span>
+          </div>
+
+          <div className="space-y-3">
+            <div className="p-3.5 rounded-xl bg-[#070d1e] border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <span className="text-xs text-slate-400 block font-medium">Signed in as</span>
+                <span className="text-sm font-bold text-amber-300 font-mono break-all">{user.email}</span>
+                <span className="text-[11px] text-slate-500 block mt-0.5">UID: {user.uid}</span>
+              </div>
+
+              {onLogout && (
+                <button
+                  onClick={onLogout}
+                  className="px-4 py-2 bg-red-950/40 hover:bg-red-900/50 text-red-300 border border-red-500/30 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer self-start sm:self-auto"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Log Out</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Backup & Data Portability */}
       <section className="bg-[#0a1226] rounded-2xl p-5 sm:p-6 border border-white/10 shadow-lg space-y-4">
